@@ -76,10 +76,10 @@ If needed, replace `http://localhost` with the machine's IP address `http://ip`
 ## Contributors
 
 ### For the Part 2:
-MEYNETGAUTHIER Emmanuel (https://github.com/8690holbertonstudents)
+MEYNETGAUTHIER Emmanuel (https://github.com/8690holbertonstudents)  
 DOYEN Nicolas (https://github.com/niranois13)
 
 #### For the Part 1:
-ROMAND Jérôme (https://github.com/jeje-digifab)
-MARTIN Maxime (https://github.com/cosmos510)
-DOYEN Nicolas (https://github.com/niranois13)
+ROMAND Jérôme (https://github.com/jeje-digifab)  
+MARTIN Maxime (https://github.com/cosmos510)  
+DOYEN Nicolas (https://github.com/niranois13)  
