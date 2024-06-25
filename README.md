@@ -54,24 +54,24 @@ The HBNB project is part of the Holberton School curriculum. It aims to create a
     By default, the application runs on port 5000.
 
     ```sh
-    docker run -t -p 80:5000 -v hbnb_data:/home/hbnb/hbnb_data hbnb
+    docker run -t -p 5000:5000 -v hbnb_data:/home/hbnb/hbnb_data hbnb
     ```
 
     To run the application directly with GitHub:
 
     ```sh
-    docker run -t -p 80:5000 -v hbnb_data:/hbnb_data --pull=always ghcr.io/niranois13/holbertonschool-hbnb:latest
+    docker run -t -p 5000:5000 -v hbnb_data:/hbnb_data --pull=always ghcr.io/niranois13/holbertonschool-hbnb:latest
     ```
 
 ## Usage
 
-Once the container is running, you can access the API at `http://localhost`.
+Once the container is running, you can access the API at `http://localhost:5000`.
 
 API documentation is available here:
 
-`http://localhost/api/docs`
+`http://localhost:5000/api/docs`
 
-If needed, replace `http://localhost` with the machine's IP address `http://ip`
+If needed, replace `http://localhost:5000` with the machine's IP address `http://ip`
 
 ## Contributors
 

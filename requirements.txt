@@ -1,7 +1,13 @@
 Flask
-validate_email_address
+validate-email_address
 requests
 pycountry
 Flask-HTTPAuth
 flask_swagger_ui
 gunicorn
+Flask-Cors
+flask-jwt-extended
+flask-jwt-extended[asymmetric_crypto]
+Flask-SQLAlchemy
+python-dotenv
+flask-bcrypt
