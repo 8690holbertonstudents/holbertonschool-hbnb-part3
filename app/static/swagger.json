@@ -25,6 +25,7 @@ paths:
                   value:
                     - id: "1"
                       name: "Beach House"
+                      address: "123 Beach House"
                       city_id: "2"
                       user_id: "3"
                       description: "A lovely beach house"
@@ -50,6 +51,7 @@ paths:
               example-1:
                 value:
                   name: "Mountain Cabin"
+                  address: "123 Beach House"
                   city_id: "4"
                   user_id: "3"
                   description: "A cozy mountain cabin"
@@ -90,6 +92,7 @@ paths:
                   value:
                     id: "1"
                     name: "Beach House"
+                    address: "123 Beach House"
                     city_id: "2"
                     user_id: "3"
                     description: "A lovely beach house"
@@ -123,6 +126,7 @@ paths:
               example-1:
                 value:
                   name: "Updated Beach House"
+                  address: "123 Beach House"
                   city_id: "2"
                   user_id: "3"
                   description: "An updated description"
