@@ -6,7 +6,7 @@ import json
 import datetime
 import os
 user_api = Blueprint("user_api", __name__)
-datamanager = DataManager(flag=1)
+# datamanager = DataManager(flag=1)
 
 
 @user_api.route("/users", methods=["POST", 'GET'])

@@ -1,11 +1,17 @@
+"""
+Python module for city class
+"""
 from models.base_model import BaseModel
+from models import db
 
 
 class City(BaseModel):
-    """ City class """
-
-    def __init__(self, name, country_id):
-        """ Constructor for City"""
-        super().__init__()
-        self.name = name
-        self.country_id = country_id
+    """
+    Defines the City class that inherits from BaseModel
+    """
+    __tablename__ = 'cities'
+    name = db.Column(db.String(128),
+                     nullable=False)
+    country_code = db.Column(db.String(2),
+                             db.ForeignKey('country_code'),
+                             nullable=False)

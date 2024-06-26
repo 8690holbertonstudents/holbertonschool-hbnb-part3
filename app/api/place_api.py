@@ -3,7 +3,7 @@ from models.place import Place
 from persistence.datamanager import DataManager
 import json
 place_api = Blueprint("place_api", __name__)
-datamanager = DataManager(flag=2)
+#datamanager = DataManager(flag=2)
 
 
 @place_api.route("/places", methods=["POST", "GET"])
