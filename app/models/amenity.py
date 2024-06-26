@@ -1,9 +1,14 @@
+"""
+Python module for amenity class
+"""
 from models.base_model import BaseModel
+from models import db
 
 
 class Amenity(BaseModel):
-    """ Amenity class """
-
-    def __init__(self, name):
-        super().__init__()
-        self.name = name
+    """
+    Defines the Amenity class that inherits from BaseModel
+    """
+    __tablename__ = 'amenities'
+    name = db.Column(db.String(128),
+                     nullable=False)

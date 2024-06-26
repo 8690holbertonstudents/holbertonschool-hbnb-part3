@@ -1,11 +1,19 @@
+"""
+Python module for user model
+"""
 from models.base_model import BaseModel
+from models import db
 
 
 class User(BaseModel):
-    """ User class """
-
-    def __init__(self, email, first_name, last_name):
-        super().__init__()
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
+    """
+    Defines the User model class inheriting from BaseModel
+    """
+    __tablename__ = 'users'
+    email = db.Column(db.String(128),
+                      unique=True,
+                      nullable=False)
+    first_name = db.Column(db.String(128),
+                           nullable=False)
+    last_name = db.Column(db.String(128),
+                          nullable=False)

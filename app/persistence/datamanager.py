@@ -1,17 +1,22 @@
 import json
 import datetime
 from persistence.ipersistencemanager import IPersistenceManager
+from models.base_model import BaseModel
+from models import db
 
 
-class DataManager(IPersistenceManager):
+class DataManager(BaseModel):
     """
-    Defines the subclass DataManager that inherits from
-    IPersistenceManager
     """
-
-    def __init__(self, flag):
-        """Method used to initialize DataManager"""
-        self.set_file_path(flag)
+    """
+    __tablename__ = 'data_manager'  # Define the table name
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    name = db.Column(db.String(128),
+                     nullable=False)
+    value = db.Column(db.String(256),
+                      nullable=False)
+    """
 
     def set_file_path(self, flag):
         """Sets in which json file data will be managed based on a flag"""

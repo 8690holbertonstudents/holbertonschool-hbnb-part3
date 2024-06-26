@@ -4,8 +4,8 @@ from persistence.datamanager import DataManager
 import json
 import datetime
 import os
-datamanager = DataManager(flag=5)
 cities_api = Blueprint("cities_api", __name__)
+#datamanager = DataManager(flag=5)
 
 
 @cities_api.route("/cities", methods=["POST", 'GET'])
