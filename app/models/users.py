@@ -1,11 +1,13 @@
 from models.base_model import BaseModel
-
+from app.app import db
 
 class User(BaseModel):
     """ User class """
+    __tablename__ = 'users'
 
-    def __init__(self, email, first_name, last_name):
-        super().__init__()
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f'<User {self.email}>'

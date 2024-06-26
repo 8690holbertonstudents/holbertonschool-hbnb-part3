@@ -1,53 +1,23 @@
-import json
-import datetime
 from persistence.ipersistencemanager import IPersistenceManager
-
+from app.app import db
 
 class DataManager(IPersistenceManager):
-    """
-    Defines the subclass DataManager that inherits from
-    IPersistenceManager
-    """
 
     def __init__(self, flag):
-        """Method used to initialize DataManager"""
-        self.set_file_path(flag)
-
-    def set_file_path(self, flag):
-        """Sets in which json file data will be managed based on a flag"""
-        if flag == 1:
-            self.file_path = "/home/hbnb/hbnb_data/User.json"
-        elif flag == 2:
-            self.file_path = "/home/hbnb/hbnb_data/Place.json"
-        elif flag == 3:
-            self.file_path = "/home/hbnb/hbnb_data/Amenity.json"
-        elif flag == 4:
-            self.file_path = "/home/hbnb/hbnb_data/Review.json"
-        elif flag == 5:
-            self.file_path = "/home/hbnb/hbnb_data/cities.json"
-
-        else:
-            raise ValueError(f"Unsupported flag value: {flag}")
+        self.session = db.session
 
     def save(self, entity):
         """
         Methdod used to save data(entity) into a JSON file
         """
-        data = []
-        try:
-            with open(self.file_path, 'r', encoding='UTF-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            pass
-        data.append(entity)
+        self.session.add(entity)
+        self.session.commit()
 
-        with open(self.file_path, 'w', encoding='UTF-8') as f:
-            json.dump(data, f, indent=4)
-
+"""
     def get(self, entity, id):
-        """
+
         Method used to get data(entity) from a JSON file
-        """
+
         try:
             with open(self.file_path, 'r', encoding='UTF-8') as f:
                 data = json.load(f)
@@ -56,11 +26,12 @@ class DataManager(IPersistenceManager):
                         return item
         except FileNotFoundError:
             pass
-
+"""
+"""
     def delete(self, entity, id):
-        """
+
         Method used to delete data(entity) from a JSON file
-        """
+
 
         try:
             with open(self.file_path, 'r', encoding='UTF-8') as f:
@@ -73,11 +44,12 @@ class DataManager(IPersistenceManager):
                         return
         except FileNotFoundError:
             pass
-
+"""
+"""
     def update(self, entity, id):
-        """
+
         Method used to update data(entity) from a JSON file
-        """
+
         try:
             with open(self.file_path, 'r', encoding='UTF-8') as f:
                 data = json.load(f)
@@ -91,3 +63,4 @@ class DataManager(IPersistenceManager):
                     return
         except FileNotFoundError:
             pass
+"""

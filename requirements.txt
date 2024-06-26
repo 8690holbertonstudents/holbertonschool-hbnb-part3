@@ -1,5 +1,5 @@
 Flask
-validate-email_address
+validate-email-address
 requests
 pycountry
 Flask-HTTPAuth
@@ -11,3 +11,4 @@ flask-jwt-extended[asymmetric_crypto]
 Flask-SQLAlchemy
 python-dotenv
 flask-bcrypt
+Flask-Migrate
