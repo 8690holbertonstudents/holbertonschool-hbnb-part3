@@ -1,19 +1,13 @@
-"""
-Python module for user model
-"""
-from models.base_model import BaseModel
-from models import db
-
+from .BaseModel import BaseModel
+from config import db
 
 class User(BaseModel):
-    """
-    Defines the User model class inheriting from BaseModel
-    """
+    """ User class """
     __tablename__ = 'users'
-    email = db.Column(db.String(128),
-                      unique=True,
-                      nullable=False)
-    first_name = db.Column(db.String(128),
-                           nullable=False)
-    last_name = db.Column(db.String(128),
-                          nullable=False)
+
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f'<User {self.email}>'

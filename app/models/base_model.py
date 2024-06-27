@@ -1,37 +1,13 @@
-"""
-Python module for defining the base model
-"""
-import datetime
-from sqlalchemy.dialects.postgresql import UUID
-from models import db
+from config import db
 import uuid
 
-
 class BaseModel(db.Model):
-    """
-    Defines the subclass BaseModel that inherits from db.Model
-    """
+    """ Base class for all models """
     __abstract__ = True
-    id = db.Column(UUID(as_uuid=True),
-                   primary_key=True,
-                   default=uuid.uuid4,
-                   unique=True,
-                   nullable=False)
-    created_at = db.Column(db.DateTime,
-                           default=db.func.current_timestamp(),
-                           nullable=False)
-    updated_at = db.Column(db.DateTime,
-                           default=db.func.current_timestamp(),
-                           onupdate=db.func.current_timestamp(),
-                           nullable=False)
 
-    def to_dict(self):
-        """
-        """
-        result = {}
-        for key, value in self.__dict__.items():
-            if isinstance(value, datetime.datetime):
-                result[key] = value.isoformat()
-            else:
-                result[key] = value
-        return result
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp(), nullable=False)
+
+    def __repr__(self):
+        return f'<BaseModel {self.id}>'
