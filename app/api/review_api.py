@@ -3,7 +3,7 @@ from models.review import Review
 from persistence.datamanager import DataManager
 import json
 review_api = Blueprint("review_api", __name__)
-datamanager = DataManager(flag=4)
+#datamanager = DataManager(flag=4)
 
 
 @review_api.route("/places/<string:id>/reviews", methods=["POST", "GET"])

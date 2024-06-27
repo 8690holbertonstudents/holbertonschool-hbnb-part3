@@ -4,7 +4,7 @@ from persistence.datamanager import DataManager
 from validate_email_address import validate_email
 
 user_api = Blueprint("user_api", __name__)
-datamanager = DataManager(flag=1)
+# datamanager = DataManager(flag=1)
 
 @user_api.route("/users", methods=["POST"])
 def add_user():

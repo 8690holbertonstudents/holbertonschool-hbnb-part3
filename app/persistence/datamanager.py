@@ -1,14 +1,10 @@
-from persistence.ipersistencemanager import IPersistenceManager
-from app.app import db
+from config import db
 
-class DataManager(IPersistenceManager):
+class DataManager:
 
-    def __init__(self, flag):
+    def __init__(self):
         self.session = db.session
 
     def save(self, entity):
-        """
-        Methdod used to save data(entity) into a JSON file
-        """
         self.session.add(entity)
         self.session.commit()

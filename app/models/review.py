@@ -1,17 +1,22 @@
+"""
+Python module for review class
+"""
 from models.base_model import BaseModel
+from models import db
 
 
 class Review(BaseModel):
-    """Defines a class Review that inherits from BaseModel"""
-
-    def __init__(self, user_id, place_id, rating, comment):
-        """Initialzes the class Review with the following parmeters:
-        :param user_id: UUID - Unique ID of an User.
-        :param place_id: UUID - Unique ID of a Place.
-        :param rating: int - rating given to a Place by an User.
-        :param comment: str - comment given to a Place by an User."""
-        super().__init__()
-        self.user_id = user_id
-        self.place_id = place_id
-        self.rating = rating
-        self.comment = comment
+    """
+    Defines the Review class that inherits from BaseModel
+    """
+    __tablename__ = 'reviews'
+    user_id = db.Column(db.String(36),
+                        db.ForeignKey('users.id'),
+                        nullable=False)
+    place_id = db.Column(db.String(36),
+                         db.ForeignKey('places.id'),
+                         nullable=False)
+    rating = db.Column(db.Integer,
+                       nullable=False)
+    comment = db.Column(db.String(1024),
+                        nullable=False)
