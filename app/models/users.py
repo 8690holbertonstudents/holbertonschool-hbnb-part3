@@ -1,4 +1,4 @@
-from .BaseModel import BaseModel
+from .base_model import BaseModel
 from config import db
 
 class User(BaseModel):
