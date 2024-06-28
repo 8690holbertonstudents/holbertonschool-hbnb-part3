@@ -1,7 +1,7 @@
 """
 Python module for country class
 """
-from models import db
+from config import db
 
 
 class Country(db.Model):

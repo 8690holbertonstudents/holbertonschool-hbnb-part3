@@ -1,8 +1,8 @@
 """
 Python module for city class
 """
-from models.base_model import BaseModel
-from models import db
+from .base_model import BaseModel
+from config import db
 
 
 class City(BaseModel):

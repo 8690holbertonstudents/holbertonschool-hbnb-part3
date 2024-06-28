@@ -3,6 +3,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from config import db, Config
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -10,10 +11,26 @@ def create_app():
     db.init_app(app)
     migrate = Migrate(app, db)
 
+    from api.amenities_api import amenities_api
+    app.register_blueprint(amenities_api)
+
+    # from api.cities_api import cities_api
+    # app.register_blueprint(cities_api)
+
+    from api.country_api import country_api
+    app.register_blueprint(country_api)
+
+    # from api.place_api import place_api
+    # app.register_blueprint(place_api)
+
+    # from api.review_api import review_api
+    # app.register_blueprint(review_api)
+
     from api.user_api import user_api
     app.register_blueprint(user_api)
 
     return app
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
