@@ -1,8 +1,8 @@
 """
 Python module for city class
 """
-from models.base_model import BaseModel
-from models import db
+from config import db
+from .base_model import BaseModel
 
 
 class City(BaseModel):
@@ -13,5 +13,5 @@ class City(BaseModel):
     name = db.Column(db.String(128),
                      nullable=False)
     country_code = db.Column(db.String(2),
-                             db.ForeignKey('country_code'),
+                             db.ForeignKey('countries.code'),
                              nullable=False)

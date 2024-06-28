@@ -1,8 +1,8 @@
 """
 Python module for amenity class
 """
-from models.base_model import BaseModel
-from models import db
+from .base_model import BaseModel
+from config import db
 
 
 class Amenity(BaseModel):

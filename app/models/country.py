@@ -1,7 +1,7 @@
 """
 Python module for country class
 """
-from models import db
+from config import db
 
 
 class Country(db.Model):
@@ -13,8 +13,6 @@ class Country(db.Model):
                      unique=True,
                      nullable=False)
     code = db.Column(db.String(2),
-                     unique=True,
-                     nullable=False,
                      primary_key=True)
 
     """
