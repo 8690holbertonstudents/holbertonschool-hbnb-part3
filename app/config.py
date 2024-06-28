@@ -5,10 +5,11 @@ import os
 
 db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+datadir = os.path.join(basedir, 'data')
+if not os.path.exists(datadir):
+    os.makedirs(datadir)
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(datadir, 'development.db')
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    
