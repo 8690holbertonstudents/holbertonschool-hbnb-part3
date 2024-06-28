@@ -6,15 +6,13 @@ Session = sessionmaker(bind=Config.engine)
 session = Session()
 
 class DataManager:
-    def save(entity):
+    def save(entity, session):
         try:
             session.add(entity)
             session.commit()
         except Exception as e:
             session.rollback()
             raise e
-        finally:
-            session.close()
 
     def read(entity):
         result = {}
@@ -26,25 +24,22 @@ class DataManager:
                     result[key] = value
         return result
 
-    def update(entity, updates):
+    def update(entity, updates, session):
         try:
             entity = session.merge(entity)
             for key, value in updates.items():
                 if hasattr(entity, key):
                     setattr(entity, key, value)
+
             session.commit()
         except Exception as e:
             session.rollback()
             raise e
-        finally:
-            session.close()
 
-    def delete(entity):
+    def delete(entity, session):
         try:
             session.delete(entity)
             session.commit()
         except Exception as e:
             session.rollback()
             raise e
-        finally:
-            session.close()
