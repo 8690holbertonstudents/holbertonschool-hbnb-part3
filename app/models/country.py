@@ -13,7 +13,6 @@ class Country(db.Model):
                      unique=True,
                      nullable=False)
     code = db.Column(db.String(2),
-                     nullable=False,
                      primary_key=True)
 
     """
