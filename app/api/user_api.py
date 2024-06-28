@@ -9,7 +9,6 @@ Session = sessionmaker(bind=Config.engine)
 session = Session()
 
 user_api = Blueprint("user_api", __name__)
-# datamanager = DataManager(flag=1)
 
 @user_api.route("/users", methods=["POST"])
 def add_user():
@@ -45,8 +44,9 @@ def add_user():
     if not new_user:
         return jsonify({"Error": "setting up new user"}), 500
     else:
-        DataManager.save(new_user)
-        return jsonify({"Success": "User added"}), 201
+        DataManager.save(new_user, db.session)
+        db.session.refresh(new_user)
+    return jsonify({"Success": "User added", 'user': DataManager.read(new_user)}), 201
 
 @user_api.route("/users", methods=["GET"])
 def read_all_users():
@@ -62,16 +62,38 @@ def get_one_user(id):
 def update_user(id):
     user = User.query.get(id)
     if not user:
-        return jsonify({'error': 'User not found'}), 404
-    updates = request.get_json()
+        return jsonify({'Error': 'User not found'}), 404
 
-    DataManager.update(user, updates)
+    updates = request.get_json()
+    if not updates:
+        return jsonify({'Error': 'No update provided'}), 409
+
+    updates_email = updates.get("email")
+    if updates_email:
+        existing_user = User.query.filter_by(email=updates_email).first()
+        if existing_user and existing_user.id != user.id:
+            return jsonify({'Error': 'Email already in use'}), 409
+
+    updates_f_name = updates.get("first_name")
+    if not all(c.isascii() for c in updates_f_name) or not \
+                                        updates_f_name.isalpha():
+        return jsonify({"Error": "First name must contain \
+only ascii characters."}), 400
+
+    updates_l_name = updates.get("last_name")
+    if not all(c.isascii() for c in updates_l_name) or not \
+                                        updates_l_name.isalpha():
+        return jsonify({"Error": "Last name must contain \
+only ascii characters."}), 400
+
+    DataManager.update(user, updates, db.session)
+    db.session.refresh(user)
     return jsonify(DataManager.read(user))
 
 @user_api.route("/users/<string:id>", methods=["DELETE"])
 def delete_user(id):
     user = User.query.get(id)
     if not user:
-        return jsonify({'Error:' 'User not found'}), 404
-    DataManager.delete(user)
-    return jsonify({'Success:' 'User deleted'}), 201
+        return jsonify({'Error': 'User not found'}), 404
+    DataManager.delete(user, db.session)
+    return jsonify({'Success': 'User deleted'}), 201
