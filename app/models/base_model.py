@@ -1,9 +1,14 @@
+"""
+Python module to define "main" class
+"""
 from config import db
 import uuid
 
 
 class BaseModel(db.Model):
-    """ Base class for all models """
+    """
+    Class BaseModel inherit from db.model
+    """
     __abstract__ = True
 
     id = db.Column(db.String(36),
