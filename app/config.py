@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+
 from sqlalchemy import create_engine
 from models import *
 import os

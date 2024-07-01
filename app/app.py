@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 from config import *
 
 
@@ -10,6 +11,10 @@ def create_app():
 
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    # Setup the Flask-JWT-Extended extension
+    app.config["JWT_SECRET_KEY"] = "iknownothingbuticanexplain"  # Change this!
+    jwt = JWTManager(app)
 
     from api.amenities_api import amenities_api
     app.register_blueprint(amenities_api)
