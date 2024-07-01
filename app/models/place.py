@@ -2,7 +2,7 @@
 Python module for place class
 """
 from .base_model import BaseModel
-from .place_amenity import PlaceAmenity
+# from .place_amenity import PlaceAmenity
 from config import db
 
 
@@ -31,28 +31,32 @@ class Place(BaseModel):
     max_guests = db.Column(db.Integer,
                            nullable=False)
     # Foreignkey definition
+    """
     place_id = db.Column(db.String(36),
                          db.ForeignKey('places.id'),
                          nullable=False)
+    """
     host_id = db.Column(db.String(36),
                         db.ForeignKey('users.id'),
                         nullable=False)
     city_id = db.Column(db.String(36),
                         db.ForeignKey('cities.id'),
                         nullable=False)
+    # 1 to 1 relationship with User
+    host = db.relationship('User',
+                           back_populates='place')
+    # 1 to many relationship with City
+    city = db.relationship('City',
+                           back_populates='places')
+    """
     # Many to many relationship with amenity
     amenities = db.relationship('Amenity',
                                 secondary='place_amenity',
                                 back_populates='places')
-    # 1 to 1 relationship with City
-    city = db.relationship('City',
-                           back_populates='places')
-    # 1 to 1 relationship with User
-    host = db.relationship('User',
-                           back_populates='places')
     # 1 to many relationship with Review
     reviews = db.relationship('Review',
                               back_populates='place')
+    """
 
     def __repr__(self):
         return f'<Place {self.name}>'

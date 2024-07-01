@@ -2,6 +2,7 @@
 Python module for amenity class
 """
 from .base_model import BaseModel
+# from .place_amenity import PlaceAmenity
 from config import db
 
 
@@ -13,10 +14,11 @@ class Amenity(BaseModel):
     # Fields definition
     name = db.Column(db.String(128),
                      nullable=False)
+    """
     # Many to Many relationship with Place
-    places = db.relationship('Place',
-                             secondary='place_amenity',
-                             back_populates='amenities')
+    place_amenities = db.relationship('PlaceAmenity',
+                                      back_populates='amenity')
+    """
 
     def __repr__(self):
         return f'<Amenity {self.name}>'
