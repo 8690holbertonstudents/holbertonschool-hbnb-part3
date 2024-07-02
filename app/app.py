@@ -13,8 +13,8 @@ def create_app():
     migrate = Migrate(app, db)
 
     # Setup the Flask-JWT-Extended extension
-    # app.config["JWT_SECRET_KEY"] = "iknownothingbuticanexplain"  # Change this!
-    # jwt = JWTManager(app)
+    app.config["JWT_SECRET_KEY"] = "iknownothingbuticanexplain"  # Change this!
+    jwt = JWTManager(app)
 
     from api.amenities_api import amenities_api
     app.register_blueprint(amenities_api)
