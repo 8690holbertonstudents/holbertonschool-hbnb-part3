@@ -4,7 +4,6 @@ from models.city import City
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
-import pycountry
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -39,10 +38,11 @@ def create_cities():
     return jsonify({"Success": "City added."}), 201
 
 
-
 @cities_api.route("/cities", methods=["GET"])
 def read_all_cities():
     all_cities = City.query.all()
+    if not all_cities:
+        return jsonify({"Error": "City not found."}), 404
     return jsonify([DataManager.read(city) for city in all_cities])
 
 

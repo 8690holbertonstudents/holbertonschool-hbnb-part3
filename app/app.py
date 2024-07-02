@@ -34,6 +34,9 @@ def create_app():
     from api.user_api import user_api
     app.register_blueprint(user_api)
 
+    from api.login_api import login_api
+    app.register_blueprint(login_api)
+
     return app
 
 
