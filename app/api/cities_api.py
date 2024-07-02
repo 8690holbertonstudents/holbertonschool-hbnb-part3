@@ -1,83 +1,83 @@
 from flask import Blueprint, jsonify, request
+from models.country import Country
 from models.city import City
 from persistence.datamanager import DataManager
-import json
-import datetime
-import os
+from config import Config, db
+from sqlalchemy.orm import sessionmaker
+import pycountry
+
+Session = sessionmaker(bind=Config.engine)
+session = Session()
+
 cities_api = Blueprint("cities_api", __name__)
-#datamanager = DataManager(flag=5)
 
 
-@cities_api.route("/cities", methods=["POST", 'GET'])
-def cities():
+@cities_api.route("/cities", methods=["POST"])
+def create_cities():
     """
     Function used to create a new city, send it to the database datamanager
     """
-    if request.method == "POST":
-        city_data = request.get_json()
-        city_id = city_data.get('id')
-        city_name = city_data.get('name')
+    city_data = request.get_json()
+    country_code = city_data.get('country_code')
+    city_name = city_data.get('city_name')
 
-        if not city_id or not city_name:
-            return jsonify({"Error": "Invalid data"}), 400
+    if not all([country_code, city_name]):
+        return jsonify({"Error": "Missing required field."}), 400
 
-        new_city = City(city_name, city_id).to_dict()
+    new_city = City(city_name=city_name, country_code=country_code)
+    if not new_city:
+        return jsonify({"Error": "setting up new user."}), 500
 
-        file_path = '/home/hbnb/hbnb_data/cities.json'
-        if not os.path.exists(file_path):
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump([], f, ensure_ascii=False, indent=4)
+    is_city_uniq = \
+        db.session.query(City.id).filter_by(city_name=city_name, \
+                                            country_code=country_code).first()
+    if is_city_uniq:
+        return jsonify({"Error": "City already exists in this country."}), 409
 
-        with open(file_path, 'r+', encoding='utf-8') as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                data = []
-
-            for entry in data:
-                if entry.get('id') == city_id:
-                    # Check if the city already exists
-                    if any(
-                            city['name'] == city_name for city in entry['city']):
-                        return jsonify({"Error": "City already exists"}), 400
-
-                    entry['city'].append(new_city)
-
-                    f.seek(0)
-                    json.dump(data, f, ensure_ascii=False, indent=4)
-                    f.truncate()
-
-                    return jsonify({"Success": "City added"}), 201
-
-            return jsonify({"Error": "Country ID not found"}), 404
-
-    if request.method == "GET":
-        with open('/home/hbnb/hbnb_data/cities.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return jsonify(data), 200
+    DataManager.create(new_city, db.session)
+    db.session.refresh(new_city)
+    return jsonify({"Success": "City added."}), 201
 
 
-@cities_api.route("/cities/<city_id>", methods=["GET", "DELETE", "PUT"])
-def get_city(city_id):
+
+@cities_api.route("/cities", methods=["GET"])
+def read_all_cities():
+    all_cities = City.query.all()
+    return jsonify([DataManager.read(city) for city in all_cities])
+
+
+@cities_api.route("/cities/<country_code>", methods=["GET"])
+def read_one_cities():
+    one_city = City.query.filter_by(id=id)
+    if not one_city:
+        return jsonify({"Error": "City not found."}), 404
+    return jsonify([DataManager.read(city) for city in one_city])
+
+@cities_api.route("/cities/<country_code>", methods=["GET", "DELETE", "PUT"])
+def get_city(country_code):
     """
     Function used to read, update or delete a specific city's info
     from the database
     """
-    if request.method == "GET":
-        with open('/home/hbnb/hbnb_data/cities.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            for entry in data:
-                for city in entry["city"]:
-                    if city.get('uniq_id') == city_id:
-                        return jsonify(city), 200
-            return jsonify({"Error": "City not found"}), 404
-    if request.method == "PUT":
+@cities_api.route("/cities/<country_code>", methods=["PUT"])
+def update_city(id):
+    city = City.query.get(id)
+    if not city:
+        return jsonify({'Error': 'City not found'}), 404
+
+    updates = request.get_json()
+    if not updates:
+        return jsonify({'Error': 'No update provided'}), 409
+
+    update_country_code = updates.get("country_code")
+    if updates_country_code:
+
         city_data = request.get_json()
         with open('/home/hbnb/hbnb_data/cities.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             for entry in data:
                 for city in entry["city"]:
-                    if city.get('uniq_id') == city_id:
+                    if city.get('uniq_id') == country_code:
                         city['name'] = city_data.get('name')
                         city["updated_at"] = datetime.datetime.now().isoformat()
                         with open('/home/hbnb/hbnb_data/cities.json', 'w', encoding='utf-8') as f:
@@ -88,7 +88,7 @@ def get_city(city_id):
             data = json.load(f)
             for entry in data:
                 for city in entry["city"]:
-                    if city.get('uniq_id') == city_id:
+                    if city.get('uniq_id') == country_code:
                         entry["city"].remove(city)
                         with open('/home/hbnb/hbnb_data/cities.json', 'w', encoding='utf-8') as f:
                             json.dump(data, f, ensure_ascii=False, indent=4)

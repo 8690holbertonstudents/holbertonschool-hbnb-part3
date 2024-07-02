@@ -11,7 +11,7 @@ class City(BaseModel):
     """
     __tablename__ = 'cities'
     # Fields definition
-    name = db.Column(db.String(128),
+    city_name = db.Column(db.String(128),
                      nullable=False)
     # Foreignkey definition
     country_code = db.Column(db.String(2),
