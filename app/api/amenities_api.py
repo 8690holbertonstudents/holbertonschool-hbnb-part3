@@ -3,7 +3,6 @@ from models.amenity import Amenity
 from persistence.datamanager import DataManager
 import json
 amenities_api = Blueprint("amenities_api", __name__)
-# datamanager = DataManager(flag=3)flask
 
 
 @amenities_api.route("/amenities", methods=["POST", 'GET'])
