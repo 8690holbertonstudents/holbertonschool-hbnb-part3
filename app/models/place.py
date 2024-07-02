@@ -16,7 +16,7 @@ class Place(BaseModel):
                      nullable=False)
     description = db.Column(db.String(1024),
                             nullable=False)
-    adress = db.Column(db.String(256),
+    address = db.Column(db.String(256),
                        nullable=False)
     latitude = db.Column(db.Float,
                          nullable=False)

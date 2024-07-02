@@ -21,9 +21,10 @@ def add_user():
         return jsonify({"Error": "Problem during user creation."}), 400
 
     email = user_data.get("email")
+    password = user_data.get("password")
     first_name = user_data.get("first_name")
     last_name = user_data.get("last_name")
-    if not all([email, first_name, last_name]):
+    if not all([email, first_name, last_name, password]):
         return jsonify({"Error": "Missing required field."}), 400
     if not all(c.isascii() for c in first_name) or not first_name.isalpha():
         return jsonify({"Error": "First name must contain only ascii characters."}), 400
@@ -40,7 +41,10 @@ def add_user():
     except FileNotFoundError:
         pass
 
-    new_user = User(email=email, first_name=first_name, last_name=last_name)
+    password_hash = User.set_password(password)
+
+    new_user = User(email=email, password_hash=password_hash, \
+                    first_name=first_name, last_name=last_name)
     if not new_user:
         return jsonify({"Error": "setting up new user"}), 500
     else:
@@ -78,13 +82,17 @@ def update_user(id):
     if not all(c.isascii() for c in updates_f_name) or not \
                                         updates_f_name.isalpha():
         return jsonify({"Error": "First name must contain \
-only ascii characters."}), 400
+only ascii characters."}), 409
 
     updates_l_name = updates.get("last_name")
     if not all(c.isascii() for c in updates_l_name) or not \
                                         updates_l_name.isalpha():
         return jsonify({"Error": "Last name must contain \
-only ascii characters."}), 400
+only ascii characters."}), 409
+
+    updates_password = updates.get("password")
+    if not updates_password:
+        return ({"Errror": "Must have a password."}), 409
 
     DataManager.update(user, updates, db.session)
     db.session.refresh(user)
