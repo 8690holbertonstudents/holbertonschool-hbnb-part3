@@ -104,4 +104,4 @@ def delete_place(id):
     if not place:
         return jsonify({'Error': 'Place not found'}), 404
     DataManager.delete(place, db.session)
-    return jsonify({'Success': 'Amenity deleted'}), 201
+    return jsonify({'Success': 'Place deleted'}), 201

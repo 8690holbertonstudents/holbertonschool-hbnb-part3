@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models.users import User
+from models.users import User, set_password
 from persistence.datamanager import DataManager
 from validate_email_address import validate_email
 from config import Config, db
@@ -41,7 +41,7 @@ def add_user():
     except FileNotFoundError:
         pass
 
-    password_hash = User.set_password(password)
+    password_hash = set_password(password)
 
     new_user = User(email=email, password_hash=password_hash, \
                     first_name=first_name, last_name=last_name)
