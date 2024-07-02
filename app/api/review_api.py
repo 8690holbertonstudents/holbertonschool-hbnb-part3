@@ -52,6 +52,7 @@ def create_review(id):
     new_review.comment = comment
     new_review.user_id = user_id
     new_review.place_id = place_id
+
     if not new_review:
         return jsonify({"Error": "creating a new review."}), 400
 
@@ -60,7 +61,7 @@ def create_review(id):
     return jsonify({"Success": "Review added", \
                     "review": DataManager.read(new_review)}), 201
 
-
+  
 @review_api.route("/users/<string:id>/reviews", methods=['GET'])
 def user_review(id):
     """

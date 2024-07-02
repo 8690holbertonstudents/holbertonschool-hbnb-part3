@@ -10,6 +10,7 @@ session = Session()
 
 user_api = Blueprint("user_api", __name__)
 
+
 @user_api.route("/users", methods=["POST"])
 def add_user():
     """
@@ -35,15 +36,18 @@ def add_user():
     if not is_email_valid:
         return jsonify({"Error": "Email not valid"}), 400
     try:
-        is_email_uniq = db.session.query(User.id).filter_by(email=email).first()
+        is_email_uniq = db.session.query(
+            User.id).filter_by(email=email).first()
         if is_email_uniq:
             return jsonify({"Error": "User already exists"}), 409
     except FileNotFoundError:
         pass
 
-    password_hash = set_password(password)
+    password_hash = User.set_password(password)
+    if not password_hash:
+        return jsonify({"Error": "Password not hashed"}), 500
 
-    new_user = User(email=email, password_hash=password_hash, \
+    new_user = User(email=email, password_hash=password_hash,
                     first_name=first_name, last_name=last_name)
     if not new_user:
         return jsonify({"Error": "setting up new user"}), 500
@@ -52,15 +56,18 @@ def add_user():
         db.session.refresh(new_user)
     return jsonify({"Success": "User added", 'User': DataManager.read(new_user)}), 201
 
+
 @user_api.route("/users", methods=["GET"])
 def read_all_users():
     all_users = User.query.all()
     return jsonify([DataManager.read(user) for user in all_users])
 
+
 @user_api.route("/users/<string:id>", methods=["GET"])
 def get_one_user(id):
     one_user = User.query.filter_by(id=id)
     return jsonify([DataManager.read(user) for user in one_user])
+
 
 @user_api.route("/users/<string:id>", methods=["PUT"])
 def update_user(id):
@@ -80,13 +87,13 @@ def update_user(id):
 
     updates_f_name = updates.get("first_name")
     if not all(c.isascii() for c in updates_f_name) or not \
-                                        updates_f_name.isalpha():
+            updates_f_name.isalpha():
         return jsonify({"Error": "First name must contain \
 only ascii characters."}), 409
 
     updates_l_name = updates.get("last_name")
     if not all(c.isascii() for c in updates_l_name) or not \
-                                        updates_l_name.isalpha():
+            updates_l_name.isalpha():
         return jsonify({"Error": "Last name must contain \
 only ascii characters."}), 409
 
@@ -97,6 +104,7 @@ only ascii characters."}), 409
     DataManager.update(user, updates, db.session)
     db.session.refresh(user)
     return jsonify({"Success": "User updated.", "User": DataManager.read(user)}), 201
+
 
 @user_api.route("/users/<string:id>", methods=["DELETE"])
 def delete_user(id):
