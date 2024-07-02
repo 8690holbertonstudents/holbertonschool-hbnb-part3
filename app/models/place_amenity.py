@@ -9,6 +9,7 @@ class PlaceAmenity(db.Model):
     Defines PlaceAmenity class that represents
     the many-to-many relationship
     """
+    """
     __tablename__ = 'place_amenity'
     place_id = db.Column(db.String(36),
                          db.ForeignKey('places.id'),
@@ -17,3 +18,5 @@ class PlaceAmenity(db.Model):
                            db.ForeignKey('amenities.id'),
                            primary_key=True)
     additional_data = db.Column(db.String(128))
+    """
+    pass
