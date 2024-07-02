@@ -1,83 +1,80 @@
 from flask import Blueprint, jsonify, request
 from models.amenity import Amenity
 from persistence.datamanager import DataManager
-import json
+from config import Config, db
+from sqlalchemy.orm import sessionmaker
+
+Session = sessionmaker(bind=Config.engine)
+session = Session()
+
 amenities_api = Blueprint("amenities_api", __name__)
 
 
-@amenities_api.route("/amenities", methods=["POST", 'GET'])
+@amenities_api.route("/amenities", methods=["POST"])
 def add_amenity():
     """
     Function used to create a new amenity, send it to the database datamanager
     and read a list of existing amenities.
     """
-    if request.method == "POST":
-        amenity_data = request.get_json()
-        if not amenity_data:
-            return jsonify({"Error": "Problem during amenity creation."}), 400
+    amenity_data = request.get_json()
+    if not amenity_data:
+        return jsonify({"Error": "Problem during amenity creation."}), 400
 
-        name = amenity_data.get("name")
-        if not name:
-            return jsonify({"Error": "Missing required field."}), 400
+    name = amenity_data.get("name")
+    if not name:
+        return jsonify({"Error": "Missing required field."}), 400
 
-        new_amenity = Amenity(name)
-        if not new_amenity:
-            return jsonify({"Error": "setting up new amenity"}), 500
-        else:
-            try:
+    new_amenity = Amenity()
+    new_amenity.name = name
+    if not new_amenity:
+        return jsonify({"Error": "setting up new amenity"}), 500
 
-                with open("/home/hbnb/hbnb_data/Amenity.json", 'r') as f:
+    is_amenity_uniq = db.session.query(Amenity.id).filter_by(name=name).first()
+    if is_amenity_uniq:
+        return jsonify({"Error": "Amenity already exists."}), 409
 
-                    amenities = json.load(f)
-                for amenity in amenities:
-                    if amenity.get("name") == name:
-                        return jsonify({"Error": "Amenity already exists"}), 409
-            except Exception as e:
-                print(e)
-            datamanager.save(new_amenity.to_dict())
-            return jsonify({"Success": "Amenity added"},
-                           new_amenity.to_dict()), 201
-    else:
-        try:
-            with open("/home/hbnb/hbnb_data/Amenity.json", 'r', encoding='utf-8') as f:
-                amenities = json.load(f)
-                return jsonify(amenities), 200
-        except FileNotFoundError:
-            return jsonify({"Error": "No amenity found"}), 404
+    DataManager.save(new_amenity, db.session)
+    db.session.refresh(new_amenity)
+    return jsonify({"Success": "Amenity added", \
+                   "Amenity": DataManager.read(new_amenity)}), 201
 
 
-@amenities_api.route("/amenities/<string:id>",
-                    methods=['GET', 'DELETE', 'PUT'])
-def get_amenity(id):
-    """
-    Function used to read, update or delete a specific amenity's info
-    from the database
-    """
-    if request.method == "GET":
-        amenities = datamanager.get("Amenity", id)
-        if not amenities:
-            return jsonify({"Error": "Amenity not found"}), 404
-        return jsonify(amenities), 200
+@amenities_api.route("/amenities", methods=["GET"])
+def read_all_amenities():
+    all_amenities = Amenity.query.all()
+    if not all_amenities:
+        return jsonify({"Error": "Amenity not found."}), 404
+    return jsonify([DataManager.read(amenity) for amenity in all_amenities])
 
-    if request.method == "DELETE":
-        amenities = datamanager.get("Amenities", id)
-        if not amenities:
-            return jsonify({"Error": "Amenity not found"}), 404
-        amenities = datamanager.delete("Amenities", id)
-        if not amenities:
-            return jsonify({"Success": "Amenity deleted"}), 200
 
-    if request.method == "PUT":
-        amenity_data = request.get_json()
-        amenity = datamanager.get("Amenity", id)
-        if not amenity:
-            return jsonify({"Error": "amenity not found"}), 404
-        try:
-            with open("/home/hbnb/hbnb_data/Amenity.json", 'r', encoding='UTF-8') as f:
-                if amenity_data["name"] in f.read():
-                    return jsonify({"Error": "Amenity already exists"}), 409
-        except FileNotFoundError:
-            pass
-        amenity["name"] = amenity_data["name"]
-        datamanager.update(amenity, id)
-        return jsonify({"Success": "Amenity updated"}, amenity), 200
+@amenities_api.route("/amenities/<string:id>", methods=['GET'])
+def read_one_amenity(id):
+    one_amenity = Amenity.query.filter_by(id=id)
+    if not one_amenity:
+        return jsonify({"Error": "Amenity not found."}), 404
+    return jsonify([DataManager.read(amenity) for amenity in one_amenity])
+
+
+@amenities_api.route("/amenities/<string:id>", methods=['PUT'])
+def update_amenity(id):
+    amenity = Amenity.query.get(id)
+    if not amenity:
+        return jsonify({'Error': 'Amenity not found'}), 404
+
+    updates = request.get_json()
+    if not updates:
+        return jsonify({'Error': 'No update provided'}), 409
+
+    DataManager.update(amenity, updates, db.session)
+    db.session.refresh(amenity)
+    return jsonify({"Success": "Amenity updated.", \
+                    "Amenity": DataManager.read(amenity)}), 201
+
+
+@amenities_api.route("/amenities/<string:id>", methods=['DELETE'])
+def delete_amenity(id):
+    amenity = Amenity.query.get(id)
+    if not amenity:
+        return jsonify({'Error': 'Amenity not found'}), 404
+    DataManager.delete(amenity, db.session)
+    return jsonify({'Success': 'Amenity deleted'}), 201
