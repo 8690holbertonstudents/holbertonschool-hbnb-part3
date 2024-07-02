@@ -1,8 +1,44 @@
 from flask import Blueprint, jsonify, request
 from models.amenity import Amenity
 from persistence.datamanager import DataManager
-import json
+from config import Config, db
+from sqlalchemy.orm import sessionmaker
+
+Session = sessionmaker(bind=Config.engine)
+session = Session()
+
 amenities_api = Blueprint("amenities_api", __name__)
+
+
+@amenities_api.route("/amenities", methods=["POST"])
+def add_user():
+    """
+    Function used to create a new user
+    and send it to the database via DataManager.
+    """
+    amenity_data = request.get_json()
+    if not amenity_data:
+        return jsonify({"Error": "Problem during amenity creation."}), 400
+
+    name = amenity_data.get("name")
+    if not name:
+        return jsonify({"Error": "Missing required field."}), 400
+
+    try:
+        is_email_uniq = db.session.query(
+            User.id).filter_by(email=email).first()
+        if is_email_uniq:
+            return jsonify({"Error": "Amenity already exists"}), 409
+    except FileNotFoundError:
+        pass
+
+    new_amenity = Amenity(name=name)
+    if not new_amenity:
+        return jsonify({"Error": "setting up new amenity"}), 500
+    else:
+        DataManager.save(new_user, db.session)
+        db.session.refresh(new_user)
+    return jsonify({"Success": "User added", 'user': DataManager.read(new_user)}), 201
 
 
 @amenities_api.route("/amenities", methods=["POST", 'GET'])
