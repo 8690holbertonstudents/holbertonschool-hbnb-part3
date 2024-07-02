@@ -53,12 +53,7 @@ def read_one_cities():
         return jsonify({"Error": "City not found."}), 404
     return jsonify([DataManager.read(city) for city in one_city])
 
-@cities_api.route("/cities/<country_code>", methods=["GET", "DELETE", "PUT"])
-def get_city(country_code):
-    """
-    Function used to read, update or delete a specific city's info
-    from the database
-    """
+
 @cities_api.route("/cities/<country_code>", methods=["PUT"])
 def update_city(id):
     city = City.query.get(id)
@@ -69,28 +64,15 @@ def update_city(id):
     if not updates:
         return jsonify({'Error': 'No update provided'}), 409
 
-    update_country_code = updates.get("country_code")
-    if updates_country_code:
+    DataManager.update(city, updates, db.session)
+    db.session.refresh(city)
+    return jsonify({"Success": "City updated.", "City": DataManager.read(city)}), 201
 
-        city_data = request.get_json()
-        with open('/home/hbnb/hbnb_data/cities.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            for entry in data:
-                for city in entry["city"]:
-                    if city.get('uniq_id') == country_code:
-                        city['name'] = city_data.get('name')
-                        city["updated_at"] = datetime.datetime.now().isoformat()
-                        with open('/home/hbnb/hbnb_data/cities.json', 'w', encoding='utf-8') as f:
-                            json.dump(data, f, ensure_ascii=False, indent=4)
-                        return jsonify({"Success": "City updated"}), 200
-    if request.method == "DELETE":
-        with open('/home/hbnb/hbnb_data/cities.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            for entry in data:
-                for city in entry["city"]:
-                    if city.get('uniq_id') == country_code:
-                        entry["city"].remove(city)
-                        with open('/home/hbnb/hbnb_data/cities.json', 'w', encoding='utf-8') as f:
-                            json.dump(data, f, ensure_ascii=False, indent=4)
-                        return jsonify({"Success": "City deleted"}), 200
-            return jsonify({"Error": "City not found"}), 404
+
+@cities_api.route("/cities/<country_code>", methods=["DELETE"])
+def delete_city(id):
+    city = City.query.get(id)
+    if not city:
+        return jsonify({'Error': 'City not found'}), 404
+    DataManager.delete(city, db.session)
+    return jsonify({'Success': 'City deleted'}), 201

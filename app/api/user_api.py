@@ -46,7 +46,7 @@ def add_user():
     else:
         DataManager.save(new_user, db.session)
         db.session.refresh(new_user)
-    return jsonify({"Success": "User added", 'user': DataManager.read(new_user)}), 201
+    return jsonify({"Success": "User added", 'User': DataManager.read(new_user)}), 201
 
 @user_api.route("/users", methods=["GET"])
 def read_all_users():
@@ -88,7 +88,7 @@ only ascii characters."}), 400
 
     DataManager.update(user, updates, db.session)
     db.session.refresh(user)
-    return jsonify(DataManager.read(user))
+    return jsonify({"Success": "User updated.", "User": DataManager.read(user)}), 201
 
 @user_api.route("/users/<string:id>", methods=["DELETE"])
 def delete_user(id):
