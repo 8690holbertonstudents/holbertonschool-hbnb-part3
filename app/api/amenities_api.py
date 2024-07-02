@@ -83,7 +83,7 @@ def add_amenity():
 
 
 @amenities_api.route("/amenities/<string:id>",
-                     methods=['GET', 'DELETE', 'PUT'])
+                    methods=['GET', 'DELETE', 'PUT'])
 def get_amenity(id):
     """
     Function used to read, update or delete a specific amenity's info
