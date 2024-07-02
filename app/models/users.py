@@ -17,10 +17,14 @@ class User(BaseModel):
     last_name = db.Column(db.String(100), nullable=False)
     # JWT secure authentification
     password_hash = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean, default=False)
 
+    is_admin = db.Column(db.Boolean,
+                         default=False)
     # 1 to 1 relationship with Place
-    place = db.relationship('Place', back_populates='host')
+    place = db.relationship('Place',
+                            uselist=False,
+                            back_populates='host')
+
     # 1 to many relationship with Review
     reviews = db.relationship('Review', back_populates='user')
 
