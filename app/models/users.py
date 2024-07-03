@@ -2,8 +2,8 @@
 Python module for User class
 """
 from .base_model import BaseModel
-from flask_bcrypt import Bcrypt
 from config import db
+from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt(None)
 
@@ -33,9 +33,6 @@ class User(BaseModel):
     reviews = db.relationship('Review',
                               back_populates='user')
 
-    def __repr__(self):
-        return f'<User {self.email}>'
-
     def set_password(password):
         """
         Sets the password hash for the user
@@ -43,8 +40,11 @@ class User(BaseModel):
         password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         return password_hash
 
-    def check_password(self, password):
+    def check_password(password_hash, password):
         """
-        Checks if given password matches the user's password hash
+        Check the password hash for the user
         """
-        return bcrypt.check_password_hash(self.password_hash, password)
+        return bcrypt.check_password_hash(password_hash, password)
+
+    def __repr__(self):
+        return f'<User {self.email}>'
