@@ -25,5 +25,6 @@ class City(BaseModel):
                              back_populates='city',
                              cascade='all, delete-orphan')
 
+
     def __repr__(self):
         return f'<City {self.name}>'
