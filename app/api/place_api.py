@@ -3,6 +3,7 @@ from models.place import Place
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -11,7 +12,9 @@ place_api = Blueprint("place_api", __name__)
 
 
 @place_api.route("/places", methods=["POST"])
+@jwt_required()
 def create_place():
+    current_user = get_jwt_identity()
     place_data = request.get_json()
     if not place_data:
         return jsonify({"Error": "Problem during place creation"})
@@ -83,7 +86,9 @@ def read_one_place(id):
 
 
 @place_api.route("/places/<string:id>", methods=['PUT'])
+@jwt_required()
 def update_place(id):
+    current_user = get_jwt_identity()
     place = Place.query.get(id)
     if not place:
         return jsonify({'Error': 'Place not found'}), 404
@@ -94,12 +99,14 @@ def update_place(id):
 
     DataManager.update(place, updates, db.session)
     db.session.refresh(place)
-    return jsonify({"Success": "Place updated.", \
+    return jsonify({"Success": "Place updated.",
                     "Place": DataManager.read(place)}), 201
 
 
 @place_api.route("/places/<string:id>", methods=['DELETE'])
+@jwt_required()
 def delete_place(id):
+    current_user = get_jwt_identity()
     place = Place.query.get(id)
     if not place:
         return jsonify({'Error': 'Place not found'}), 404

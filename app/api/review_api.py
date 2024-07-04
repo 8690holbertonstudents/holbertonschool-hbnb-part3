@@ -1,8 +1,11 @@
 from flask import Blueprint, jsonify, request
 from models.review import Review
+from models.place import Place
+from models.users import User
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -11,10 +14,12 @@ review_api = Blueprint("review_api", __name__)
 
 
 @review_api.route("/places/<string:id>/reviews", methods=["POST"])
+@jwt_required()
 def create_review(id):
     """
     Function used to create and retriew reviews of a place
     """
+    current_user = get_jwt_identity()
     place_id = id
     review_data = request.get_json()
     if not review_data:
@@ -31,95 +36,83 @@ def create_review(id):
     if not isinstance(comment, str):
         return jsonify({"Error": "comment must be a string."}), 400
 
-    try:
-        with open("/home/hbnb/hbnb_data/User.json", 'r', encoding='UTF-8') as f:
-            users = json.load(f)
-        user_id = review_data.get("user_id")
-        user_found = False
-        for user in users:
-            if user.get("uniq_id") == user_id:
-                user_found = True
-                break
-        if not user_found:
-            return jsonify({"Error": "User not found"}), 404
-    except Exception as e:
-        return jsonify({"Error": str(e)}), 404
+    user_id = review_data.get("user_id")
+    if not all(rating, comment, user_id, place_id):
+        return jsonify({"Error": "Missing recquired field."}), 409
 
-    try:
-        with open("/home/hbnb/hbnb_data/Place.json", 'r', encoding='UTF-8') as f:
-            hosts = json.load(f)
-        for host in hosts:
-            if host.get("host_id") == user_id:
-                return jsonify({"Error": "Can't rate your own place"}), 400
-    except Exception as e:
-        return jsonify({"Error": str(e)}), 404
+    is_host = \
+        db.session.query(Place.id).filter_by(host_id=Place.host_id).first()
+    if is_host == user_id:
+        return jsonify({"Error": "You cannot review your own place."}), 400
 
-    try:
-        with open("/home/hbnb/hbnb_data/Review.json", 'r', encoding='UTF-8') as f:
-            reviews = json.load(f)
-        for review in reviews:
-            if review.get("user_id") == user_id \
-                    and review.get("place_id") == place_id:
-                return jsonify({"Error":
-                                "Can't comment a same place twice"}), 400
-    except Exception as e:
-        return jsonify({"Error": str(e)}), 404
+    existing_review = db.session.query(Review)\
+        .filter_by(user_id=user_id, place_id=place_id).first()
+    if existing_review:
+        return jsonify({"Error": "You cannot review a place twice."}), 400
 
-    if not all([user_id, place_id, rating, comment]):
-        return jsonify({"Error": "Missing recquired field"}), 409
+    new_review = Review()
+    new_review.rating = rating
+    new_review.comment = comment
+    new_review.user_id = user_id
+    new_review.place_id = place_id
 
-    new_review = Review(user_id, place_id, rating, comment)
     if not new_review:
-        return jsonify({"Error": "adding new review"}), 500
-    else:
-        datamanager.save(new_review.to_dict())
-        return jsonify({"Success": "Review added"}), 201
+        return jsonify({"Error": "creating a new review."}), 400
+
+    DataManager.save(new_review, db.session)
+    db.session.refresh(new_review)
+    return jsonify({"Success": "Review added",
+                    "review": DataManager.read(new_review)}), 201
 
 
 @review_api.route("/users/<string:id>/reviews", methods=['GET'])
+@jwt_required()
 def user_review(id):
     """
     Function that retrieves all reviews of a specific user
     """
-    user_id = id
-    try:
-        with open("/home/hbnb/hbnb_data/Review.json", 'r', encoding='UTF-8') as f:
-            reviews = json.load(f)
-        for review in reviews:
-            if review.get("user_id") == user_id:
-                return jsonify(reviews), 200
-    except FileNotFoundError:
-        return jsonify({"Error": "Review not found"}), 404
-    except Exception as e:
-        return jsonify({"Error": str(e)})
+    current_user = get_jwt_identity()
+    those_reviews = db.session.query(Review.id).filter_by(id=id)
+    if not those_reviews:
+        return jsonify({"Error": "Review not found."}), 404
+    return jsonify({"Reviews": DataManager.read(review)
+                    for review in those_reviews}), 201
 
 
-@review_api.route("/reviews/<string:id>", methods=['GET', 'PUT', 'DELETE'])
-def review_info(id):
+@review_api.route("/reviews/<string:id>", methods=['GET'])
+@jwt_required()
+def read_one_review(id):
     """
     Function that retrieves, updates and deletes a specific review
     """
-    review_id = id
-    if request.method == "GET":
-        reviews = datamanager.get("Reviews", review_id)
-        if not reviews:
-            return jsonify({"Error": "Review not found"}), 404
-        return jsonify(reviews), 200
+    one_review = Review.query.filter_by(id=id)
+    return jsonify([DataManager.read(review) for review in one_review])
 
-    if request.method == "PUT":
-        review_data = request.get_json()
-        review = datamanager.get("Review", id)
-        if not review:
-            return jsonify({"Error": "Review not found"}), 404
-        review["rating"] = review_data["rating"]
-        review["comment"] = review_data["comment"]
-        datamanager.update(review, id)
-        return jsonify({"Success": "Review updated"}), 200
 
-    if request.method == "DELETE":
-        reviews = datamanager.get("Review", id)
-        if not reviews:
-            return jsonify({"Error": "Review not found"}), 404
-        reviews = datamanager.delete("Reviews", id)
-        if not reviews:
-            return jsonify({"Success": "Review deleted"}), 200
+@review_api.route("/reviews/<string:id>", methods=['PUT'])
+@jwt_required()
+def update_review(id):
+    current_user = get_jwt_identity()
+    review = Review.query.get(id)
+    if not review:
+        return jsonify({'Error': 'Review not found'}), 404
+
+    updates = request.get_json()
+    if not updates:
+        return jsonify({'Error': 'No update provided'}), 409
+
+    DataManager.update(review, updates, db.session)
+    db.session.refresh(review)
+    return jsonify({"Success": "Review updated.",
+                    "Place": DataManager.read(review)}), 201
+
+
+@review_api.route("/reviews/<string:id>", methods=['DELETE'])
+@jwt_required()
+def delete_review(id):
+    current_user = get_jwt_identity()
+    review = Review.query.get(id)
+    if not review:
+        return jsonify({'Error': 'Review not found'}), 404
+    DataManager.delete(review, db.session)
+    return jsonify({'Success': 'Review deleted'}), 201

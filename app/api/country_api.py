@@ -5,6 +5,8 @@ from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
 import pycountry
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from api.login_api import admin_only
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -13,11 +15,16 @@ country_api = Blueprint("country_api", __name__)
 
 
 @country_api.route("/countries", methods=["POST"])
+@jwt_required()
 def country():
     """
     Function used to retrieve a new country from Pycountry
     and send it to the database via DataManager
     """
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     country_data = request.get_json()
     country_name = country_data.get("name")
     country_code = country_data.get("code")
@@ -42,17 +49,20 @@ def country():
         db.session.rollback()
         raise e
 
+
 @country_api.route("/countries", methods=["GET"])
+@jwt_required()
 def read_countries_from_pycountry():
     """
     Function that retrieves and reads countries from Pycountry.
     """
-    countries = [{"name": country.name, "code": country.alpha_2} \
-                for country in pycountry.countries]
+    countries = [{"name": country.name, "code": country.alpha_2}
+                 for country in pycountry.countries]
     return jsonify(countries), 200
 
 
 @country_api.route("/countries/<country_code>", methods=["GET"])
+@jwt_required()
 def get_country(country_code):
     """
     Function used to retrieve details of a specific country by its code
@@ -66,17 +76,18 @@ def get_country(country_code):
 
 
 @country_api.route("/countries/<country_code>/cities", methods=["GET"])
+@jwt_required()
 def get_country_cities(country_code):
     """
     Function used to retrieve all cities belonging to a specific country
     """
     country = pycountry.countries.get(alpha_2=country_code.upper())
-    if not country :
+    if not country:
         return jsonify({"Error": "Country not found"}), 404
 
     cities = City.query.filter_by(country_code=country.alpha_2).all()
     if not cities:
         return jsonify({"error": "No cities found for this country."}), 404
 
-    return jsonify({'Cities': \
+    return jsonify({'Cities':
                     [DataManager.read(city) for city in cities]}), 200

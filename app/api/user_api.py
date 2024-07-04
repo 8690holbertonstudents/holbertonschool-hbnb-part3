@@ -4,7 +4,8 @@ from persistence.datamanager import DataManager
 from validate_email_address import validate_email
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
-
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from api.login_api import admin_only
 Session = sessionmaker(bind=Config.engine)
 session = Session()
 
@@ -58,19 +59,28 @@ def add_user():
 
 
 @user_api.route("/users", methods=["GET"])
+@jwt_required()
 def read_all_users():
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     all_users = User.query.all()
     return jsonify([DataManager.read(user) for user in all_users])
 
 
 @user_api.route("/users/<string:id>", methods=["GET"])
+@jwt_required()
 def get_one_user(id):
+    current_user = get_jwt_identity()
     one_user = User.query.filter_by(id=id)
     return jsonify([DataManager.read(user) for user in one_user])
 
 
 @user_api.route("/users/<string:id>", methods=["PUT"])
+@jwt_required()
 def update_user(id):
+    current_user = get_jwt_identity()
     user = User.query.get(id)
     if not user:
         return jsonify({'Error': 'User not found'}), 404
@@ -107,7 +117,9 @@ only ascii characters."}), 409
 
 
 @user_api.route("/users/<string:id>", methods=["DELETE"])
+@jwt_required()
 def delete_user(id):
+    current_user = get_jwt_identity()
     user = User.query.get(id)
     if not user:
         return jsonify({'Error': 'User not found'}), 404

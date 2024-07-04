@@ -3,6 +3,8 @@ from models.amenity import Amenity
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from api.login_api import admin_only
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -11,11 +13,13 @@ amenities_api = Blueprint("amenities_api", __name__)
 
 
 @amenities_api.route("/amenities", methods=["POST"])
+@jwt_required()
 def add_amenity():
     """
     Function used to create a new amenity, send it to the database datamanager
     and read a list of existing amenities.
     """
+    current_user = get_jwt_identity()
     amenity_data = request.get_json()
     if not amenity_data:
         return jsonify({"Error": "Problem during amenity creation."}), 400
@@ -35,7 +39,7 @@ def add_amenity():
 
     DataManager.save(new_amenity, db.session)
     db.session.refresh(new_amenity)
-    return jsonify({"Success": "Amenity added", \
+    return jsonify({"Success": "Amenity added",
                    "Amenity": DataManager.read(new_amenity)}), 201
 
 
@@ -56,7 +60,12 @@ def read_one_amenity(id):
 
 
 @amenities_api.route("/amenities/<string:id>", methods=['PUT'])
+@jwt_required()
 def update_amenity(id):
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     amenity = Amenity.query.get(id)
     if not amenity:
         return jsonify({'Error': 'Amenity not found'}), 404
@@ -67,12 +76,17 @@ def update_amenity(id):
 
     DataManager.update(amenity, updates, db.session)
     db.session.refresh(amenity)
-    return jsonify({"Success": "Amenity updated.", \
+    return jsonify({"Success": "Amenity updated.",
                     "Amenity": DataManager.read(amenity)}), 201
 
 
 @amenities_api.route("/amenities/<string:id>", methods=['DELETE'])
+@jwt_required()
 def delete_amenity(id):
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     amenity = Amenity.query.get(id)
     if not amenity:
         return jsonify({'Error': 'Amenity not found'}), 404
