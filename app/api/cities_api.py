@@ -4,6 +4,8 @@ from models.city import City
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from api.login_api import admin_only
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -12,10 +14,12 @@ cities_api = Blueprint("cities_api", __name__)
 
 
 @cities_api.route("/cities", methods=["POST"])
+@jwt_required()
 def create_cities():
     """
     Function used to create a new city, send it to the database datamanager
     """
+    current_user = get_jwt_identity()
     city_data = request.get_json()
     country_code = city_data.get('country_code')
     city_name = city_data.get('city_name')
@@ -28,7 +32,7 @@ def create_cities():
         return jsonify({"Error": "setting up new user."}), 500
 
     is_city_uniq = \
-        db.session.query(City.id).filter_by(city_name=city_name, \
+        db.session.query(City.id).filter_by(city_name=city_name,
                                             country_code=country_code).first()
     if is_city_uniq:
         return jsonify({"Error": "City already exists in this country."}), 409
@@ -55,7 +59,12 @@ def read_one_cities():
 
 
 @cities_api.route("/cities/<country_code>", methods=["PUT"])
+@jwt_required()
 def update_city(id):
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     city = City.query.get(id)
     if not city:
         return jsonify({'Error': 'City not found'}), 404
@@ -70,7 +79,12 @@ def update_city(id):
 
 
 @cities_api.route("/cities/<country_code>", methods=["DELETE"])
+@jwt_required()
 def delete_city(id):
+    current_user = get_jwt_identity()
+    is_admin = admin_only()
+    if not is_admin:
+        return jsonify({"Error": "Admin only !"}), 401
     city = City.query.get(id)
     if not city:
         return jsonify({'Error': 'City not found'}), 404

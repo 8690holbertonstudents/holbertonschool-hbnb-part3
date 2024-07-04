@@ -5,6 +5,7 @@ from models.users import User
 from persistence.datamanager import DataManager
 from config import Config, db
 from sqlalchemy.orm import sessionmaker
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 Session = sessionmaker(bind=Config.engine)
 session = Session()
@@ -13,10 +14,12 @@ review_api = Blueprint("review_api", __name__)
 
 
 @review_api.route("/places/<string:id>/reviews", methods=["POST"])
+@jwt_required()
 def create_review(id):
     """
     Function used to create and retriew reviews of a place
     """
+    current_user = get_jwt_identity()
     place_id = id
     review_data = request.get_json()
     if not review_data:
@@ -58,22 +61,26 @@ def create_review(id):
 
     DataManager.save(new_review, db.session)
     db.session.refresh(new_review)
-    return jsonify({"Success": "Review added", \
+    return jsonify({"Success": "Review added",
                     "review": DataManager.read(new_review)}), 201
 
 
 @review_api.route("/users/<string:id>/reviews", methods=['GET'])
+@jwt_required()
 def user_review(id):
     """
     Function that retrieves all reviews of a specific user
     """
+    current_user = get_jwt_identity()
     those_reviews = db.session.query(Review.id).filter_by(id=id)
     if not those_reviews:
         return jsonify({"Error": "Review not found."}), 404
-    return jsonify({"Reviews": DataManager.read(review) \
+    return jsonify({"Reviews": DataManager.read(review)
                     for review in those_reviews}), 201
 
+
 @review_api.route("/reviews/<string:id>", methods=['GET'])
+@jwt_required()
 def read_one_review(id):
     """
     Function that retrieves, updates and deletes a specific review
@@ -83,7 +90,9 @@ def read_one_review(id):
 
 
 @review_api.route("/reviews/<string:id>", methods=['PUT'])
+@jwt_required()
 def update_review(id):
+    current_user = get_jwt_identity()
     review = Review.query.get(id)
     if not review:
         return jsonify({'Error': 'Review not found'}), 404
@@ -94,12 +103,14 @@ def update_review(id):
 
     DataManager.update(review, updates, db.session)
     db.session.refresh(review)
-    return jsonify({"Success": "Review updated.", \
+    return jsonify({"Success": "Review updated.",
                     "Place": DataManager.read(review)}), 201
 
 
 @review_api.route("/reviews/<string:id>", methods=['DELETE'])
+@jwt_required()
 def delete_review(id):
+    current_user = get_jwt_identity()
     review = Review.query.get(id)
     if not review:
         return jsonify({'Error': 'Review not found'}), 404

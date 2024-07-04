@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from models.users import User
 from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt
 login_api = Blueprint("login_api", __name__)
 
 
@@ -13,6 +14,17 @@ def login():
     user = User.query.filter_by(email=email).first()
     # Manage access token
     if user and User.check_password(user.password_hash, password):
-        access_token = create_access_token(identity=email)
+        # Add role information to the token
+        additional_claims = {"is_admin": user.is_admin}
+        # Create user access token
+        access_token = create_access_token(
+            identity=user.id, additional_claims=additional_claims)
         return jsonify(access_token=access_token), 200
-    return 'Wrong username or password', 401
+    return jsonify({"Error": "Wrong access input"}), 401
+
+
+def admin_only():
+    claims = get_jwt()
+    if claims.get("is_admin") is False:
+        return False
+    return True
