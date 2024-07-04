@@ -100,6 +100,9 @@ only ascii characters."}), 409
     updates_password = updates.get("password")
     if not updates_password:
         return ({"Errror": "Must have a password."}), 409
+    password_hash = User.set_password(updates_password)
+    if not password_hash:
+        return jsonify({"Error": "Password not hashed"}), 500
 
     DataManager.update(user, updates, db.session)
     db.session.refresh(user)
