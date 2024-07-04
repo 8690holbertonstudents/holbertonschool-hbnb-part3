@@ -17,17 +17,8 @@ class Country(db.Model):
                      primary_key=True)
     # 1 to many relationship with City
     cities = db.relationship('City',
-                             back_populates='country')
+                             back_populates='country',
+                             cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Country {self.name}>'
-
-    """
-    def to_dict(self):
-        """
-    """
-        result = {}
-        for key, value in self.__dict__.items():
-            result[key] = value
-        return result
-    """

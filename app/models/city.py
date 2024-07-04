@@ -22,7 +22,8 @@ class City(BaseModel):
                               back_populates='cities')
     # 1 to many relationship with Place
     places = db.relationship('Place',
-                             back_populates='city')
+                             back_populates='city',
+                             cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<City {self.name}>'

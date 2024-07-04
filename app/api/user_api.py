@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models.users import User, set_password
+from models.users import User
 from persistence.datamanager import DataManager
 from validate_email_address import validate_email
 from config import Config, db
@@ -100,6 +100,9 @@ only ascii characters."}), 409
     updates_password = updates.get("password")
     if not updates_password:
         return ({"Errror": "Must have a password."}), 409
+    password_hash = User.set_password(updates_password)
+    if not password_hash:
+        return jsonify({"Error": "Password not hashed"}), 500
 
     DataManager.update(user, updates, db.session)
     db.session.refresh(user)

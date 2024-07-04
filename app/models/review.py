@@ -15,20 +15,21 @@ class Review(BaseModel):
                        nullable=False)
     comment = db.Column(db.String(1024),
                         nullable=False)
+    place_id = db.Column(db.String(36),
+                        db.ForeignKey('places.id'),
+                        nullable=False)
     # Foreignkey definition
     user_id = db.Column(db.String(36),
                         db.ForeignKey('users.id'),
                         nullable=False)
+    
     # 1 to many relationship with User
     user = db.relationship('User',
                            back_populates='reviews')
-    """
-    place_id = db.Column(db.String(36),
-                         db.ForeignKey('places.id'),
-                         nullable=False)
+
     # 1 to many relationship with Place
     place = db.relationship('Place', back_populates='reviews')
-    """
+
 
     def __repr__(self):
         return f'<Review {self.comment}>'

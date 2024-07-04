@@ -28,10 +28,12 @@ class User(BaseModel):
     # 1 to 1 relationship with Place
     place = db.relationship('Place',
                             uselist=False,
-                            back_populates='host')
+                            back_populates='host',
+                            cascade='all, delete-orphan')
     # 1 to many relationship with Review
     reviews = db.relationship('Review',
-                              back_populates='user')
+                              back_populates='user',
+                              cascade='all, delete-orphan')
 
     def set_password(password):
         """
