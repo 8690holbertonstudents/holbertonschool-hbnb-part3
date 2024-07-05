@@ -8,6 +8,8 @@ from config import *
 from dotenv import load_dotenv
 
 load_dotenv()
+host = os.environ.get('HOST')
+port = int(os.environ.get('PORT', 5000))
 
 
 def create_app():
@@ -18,12 +20,12 @@ def create_app():
     migrate = Migrate(app, db)
 
     # Setup the Flask-JWT-Extended extension
-    app.config["JWT_SECRET_KEY"] = "iknownothingbuticanexplain"  # Change this!
+    app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY')
     jwt = JWTManager(app)
 
     @jwt.unauthorized_loader
     def unauthorized_response(callback): return jsonify(
-        {'msg': 'Missing Authorization Header'}), 401
+        {'Error': 'Missing Authorization Header'}), 401
 
     # Add swagger documentation
     CORS(app, resources={r"/*": {"origins": "http://localhost"}})
@@ -59,6 +61,5 @@ def create_app():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
     app = create_app()
-    app.run(debug=app.config['DEBUG'], host="0.0.0.0", port=port)
+    app.run(debug=app.config['DEBUG'], host=host, port=port)

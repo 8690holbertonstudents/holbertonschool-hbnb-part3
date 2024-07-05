@@ -12,3 +12,4 @@ Flask-SQLAlchemy
 python-dotenv
 flask-bcrypt
 Flask-Migrate
+psycopg2-binary
