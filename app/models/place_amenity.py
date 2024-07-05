@@ -1,3 +1,7 @@
+"""
+Module that makes a jonction between the classes Place and Amenity.
+Useful to handle 'many to many' relationship"""
+
 from config import db
 
 place_amenities = db.Table('place_amenities',

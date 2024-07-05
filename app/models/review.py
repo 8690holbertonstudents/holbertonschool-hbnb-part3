@@ -22,7 +22,7 @@ class Review(BaseModel):
     user_id = db.Column(db.String(36),
                         db.ForeignKey('users.id'),
                         nullable=False)
-    
+
     # 1 to many relationship with User
     user = db.relationship('User',
                            back_populates='reviews')
