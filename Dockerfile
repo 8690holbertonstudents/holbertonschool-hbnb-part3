@@ -34,6 +34,10 @@ RUN chmod -R 774 /home/hbnb/hbnb_data
 ENV PORT 5000
 EXPOSE 5000
 
+# Wait for PostgreSQL to be ready
+COPY wait-for-it.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
 # Define the entry point of the application
 WORKDIR /home/hbnb/
 

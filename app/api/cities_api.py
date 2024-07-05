@@ -17,7 +17,8 @@ cities_api = Blueprint("cities_api", __name__)
 @jwt_required()
 def create_cities():
     """
-    Function used to create a new city, send it to the database datamanager
+    Function used to create a new city, send it to the database datamanager.
+    :Returns: jsonify + message + error/success code.
     """
     current_user = get_jwt_identity()
     city_data = request.get_json()
@@ -44,14 +45,23 @@ def create_cities():
 
 @cities_api.route("/cities", methods=["GET"])
 def read_all_cities():
+    """
+    Function used to read all cities from te database.
+    :Returns: jsonify + message + error/success code.
+    """
     all_cities = City.query.all()
     if not all_cities:
         return jsonify({"Error": "City not found."}), 404
-    return jsonify([DataManager.read(city) for city in all_cities])
+    return jsonify([DataManager.read(city) for city in all_cities]), 201
 
 
 @cities_api.route("/cities/<country_code>", methods=["GET"])
-def read_one_cities():
+def read_one_cities(id):
+    """
+    Function used to retrieve one city from the database
+    :param id: UUID - ID of the specific city.
+    :Returns: jsonify + message + error/success code.
+    """
     one_city = City.query.filter_by(id=id)
     if not one_city:
         return jsonify({"Error": "City not found."}), 404
@@ -61,10 +71,17 @@ def read_one_cities():
 @cities_api.route("/cities/<country_code>", methods=["PUT"])
 @jwt_required()
 def update_city(id):
+    """
+    Function used to update a specific city from the database.
+    Admin only
+    :param id: UUID - ID of the specific city.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     is_admin = admin_only()
     if not is_admin:
         return jsonify({"Error": "Admin only !"}), 401
+
     city = City.query.get(id)
     if not city:
         return jsonify({'Error': 'City not found'}), 404
@@ -81,6 +98,12 @@ def update_city(id):
 @cities_api.route("/cities/<country_code>", methods=["DELETE"])
 @jwt_required()
 def delete_city(id):
+    """
+    Function used to delete a specific city from the database.
+    Admin only
+    :param id: UUID - ID of the specific city.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     is_admin = admin_only()
     if not is_admin:

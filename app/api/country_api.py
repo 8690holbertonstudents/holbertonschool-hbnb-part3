@@ -19,7 +19,8 @@ country_api = Blueprint("country_api", __name__)
 def country():
     """
     Function used to retrieve a new country from Pycountry
-    and send it to the database via DataManager
+    and send it to the database via DataManager.
+    :Returns: jsonify + message + error/success code.
     """
     current_user = get_jwt_identity()
     is_admin = admin_only()
@@ -55,6 +56,7 @@ def country():
 def read_countries_from_pycountry():
     """
     Function that retrieves and reads countries from Pycountry.
+    :Returns: jsonify + message + error/success code.
     """
     countries = [{"name": country.name, "code": country.alpha_2}
                  for country in pycountry.countries]
@@ -65,7 +67,9 @@ def read_countries_from_pycountry():
 @jwt_required()
 def get_country(country_code):
     """
-    Function used to retrieve details of a specific country by its code
+    Function used to retrieve details of a specific country from pycountry.
+    :param country_code: alpha code of a specific country.
+    :Returns: jsonify + message + error/success code.
     """
     country = pycountry.countries.get(alpha_2=country_code.upper())
     if not country:
@@ -79,7 +83,9 @@ def get_country(country_code):
 @jwt_required()
 def get_country_cities(country_code):
     """
-    Function used to retrieve all cities belonging to a specific country
+    Function used to retrieve all cities belonging to a specific country*
+    :param country_code: alpha code of a specific country.
+    :Returns: jsonify + message + error/success code.
     """
     country = pycountry.countries.get(alpha_2=country_code.upper())
     if not country:

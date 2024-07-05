@@ -7,6 +7,12 @@ login_api = Blueprint("login_api", __name__)
 
 @login_api.route('/login', methods=['POST'])
 def login():
+    """
+    Function used to handle logins by comparing user entries (email/password)
+    and calling the check_password method from the User class.
+    :Returns: jsonify + message + error code on failure
+    :Returns: jsonify + access token + success code on success
+    """
     # Require data for login
     email = request.json.get('email', None)
     password = request.json.get('password', None)
@@ -24,6 +30,10 @@ def login():
 
 
 def admin_only():
+    """
+    Function used to handle admin claims.
+    :Returns: boolean
+    """
     claims = get_jwt()
     if claims.get("is_admin") is False:
         return False

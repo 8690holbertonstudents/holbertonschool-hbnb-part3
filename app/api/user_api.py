@@ -15,8 +15,8 @@ user_api = Blueprint("user_api", __name__)
 @user_api.route("/users", methods=["POST"])
 def add_user():
     """
-    Function used to create a new user
-    and send it to the database via DataManager.
+    Function used to create a new user and send it to the database.
+    :Returns: jsonify + message + error/success code.
     """
     user_data = request.get_json()
     if not user_data:
@@ -61,25 +61,40 @@ def add_user():
 @user_api.route("/users", methods=["GET"])
 @jwt_required()
 def read_all_users():
+    """
+    Function used to retrieve all users from the database.
+    Admin only
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     is_admin = admin_only()
     if not is_admin:
         return jsonify({"Error": "Admin only !"}), 401
     all_users = User.query.all()
-    return jsonify([DataManager.read(user) for user in all_users])
+    return jsonify([DataManager.read(user) for user in all_users]), 201
 
 
 @user_api.route("/users/<string:id>", methods=["GET"])
 @jwt_required()
 def get_one_user(id):
+    """
+    Function used to retrieve a specific user from the database.
+    :param id: UUID - ID of this specific user.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     one_user = User.query.filter_by(id=id)
-    return jsonify([DataManager.read(user) for user in one_user])
+    return jsonify([DataManager.read(user) for user in one_user]), 201
 
 
 @user_api.route("/users/<string:id>", methods=["PUT"])
 @jwt_required()
 def update_user(id):
+    """
+    Function used to update a specific user from the database.
+    :param id: UUID - ID of this specific user.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     user = User.query.get(id)
     if not user:
@@ -98,14 +113,16 @@ def update_user(id):
     updates_f_name = updates.get("first_name")
     if not all(c.isascii() for c in updates_f_name) or not \
             updates_f_name.isalpha():
-        return jsonify({"Error": "First name must contain \
-only ascii characters."}), 409
+        return jsonify(
+            {"Error": "First name must contain only ascii characters."}
+), 409
 
     updates_l_name = updates.get("last_name")
     if not all(c.isascii() for c in updates_l_name) or not \
             updates_l_name.isalpha():
-        return jsonify({"Error": "Last name must contain \
-only ascii characters."}), 409
+        return jsonify(
+            {"Error": "Last name must contain only ascii characters."}
+    ), 409
 
     updates_password = updates.get("password")
     if not updates_password:
@@ -122,6 +139,11 @@ only ascii characters."}), 409
 @user_api.route("/users/<string:id>", methods=["DELETE"])
 @jwt_required()
 def delete_user(id):
+    """
+    Function used to delete a specific user from the database.
+    :param id: UUID - ID of this user.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     user = User.query.get(id)
     if not user:
