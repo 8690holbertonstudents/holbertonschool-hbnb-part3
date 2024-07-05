@@ -17,7 +17,9 @@ review_api = Blueprint("review_api", __name__)
 @jwt_required()
 def create_review(id):
     """
-    Function used to create and retriew reviews of a place
+    Function used to create reviews of a place and send them to the database.
+    :param id: UUID - id of the place.
+    :Returns: jsonify + message + error/success code.
     """
     current_user = get_jwt_identity()
     place_id = id
@@ -69,7 +71,9 @@ def create_review(id):
 @jwt_required()
 def user_review(id):
     """
-    Function that retrieves all reviews of a specific user
+    Function used to retrieve reviews posted by a user from the database.
+    :param id: UUID - id of the place.
+    :Returns: jsonify + message + error/success code.
     """
     current_user = get_jwt_identity()
     those_reviews = db.session.query(Review.id).filter_by(id=id)
@@ -83,15 +87,24 @@ def user_review(id):
 @jwt_required()
 def read_one_review(id):
     """
-    Function that retrieves, updates and deletes a specific review
+    Function used to retrieve and read a specific review, from the database.
+    :param id: UUID - id of the review.
+    :Returns: jsonify + message + error/success code.
     """
     one_review = Review.query.filter_by(id=id)
-    return jsonify([DataManager.read(review) for review in one_review])
+    if not one_review:
+        return jsonify({"Error": "Review not found."}), 404
+    return jsonify([DataManager.read(review) for review in one_review]), 201
 
 
 @review_api.route("/reviews/<string:id>", methods=['PUT'])
 @jwt_required()
 def update_review(id):
+    """
+    Function used to update a specific review, from the database.
+    :param id: UUID - id of the review.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     review = Review.query.get(id)
     if not review:
@@ -110,6 +123,11 @@ def update_review(id):
 @review_api.route("/reviews/<string:id>", methods=['DELETE'])
 @jwt_required()
 def delete_review(id):
+    """
+    Function used to delete a specific review, from the database.
+    :param id: UUID - id of the review.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     review = Review.query.get(id)
     if not review:

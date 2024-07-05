@@ -14,6 +14,10 @@ place_api = Blueprint("place_api", __name__)
 @place_api.route("/places", methods=["POST"])
 @jwt_required()
 def create_place():
+    """
+    Function used to create a new place, send it to the database datamanager.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     place_data = request.get_json()
     if not place_data:
@@ -71,6 +75,10 @@ def create_place():
 
 @place_api.route("/places", methods=["GET"])
 def read_all_places():
+    """
+    Function used to retrieve and read all places, from the database.
+    :Returns: jsonify + message + error/success code.
+    """
     all_places = Place.query.all()
     if not all_places:
         return jsonify({"Error": "Place not found."}), 404
@@ -79,6 +87,11 @@ def read_all_places():
 
 @place_api.route("/places/<string:id>", methods=['GET'])
 def read_one_place(id):
+    """
+    Function used to retrieve and read a specific place, from the database.
+    :param id: UUID - ID of a specific place
+    :Returns: jsonify + message + error/success code.
+    """
     one_place = Place.query.filter_by(id=id)
     if not one_place:
         return jsonify({"Error": "Place not found."}), 404
@@ -88,6 +101,12 @@ def read_one_place(id):
 @place_api.route("/places/<string:id>", methods=['PUT'])
 @jwt_required()
 def update_place(id):
+    """
+    Function used to update a specific place, from the database.
+    Admin or owner only
+    :param id: UUID - ID of a specific place
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     place = Place.query.get(id)
     if not place:
@@ -106,6 +125,12 @@ def update_place(id):
 @place_api.route("/places/<string:id>", methods=['DELETE'])
 @jwt_required()
 def delete_place(id):
+    """
+    Function used to delete a specific place, from the database.
+    Admin or owner only
+    :param id: UUID - ID of a specific place
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     place = Place.query.get(id)
     if not place:

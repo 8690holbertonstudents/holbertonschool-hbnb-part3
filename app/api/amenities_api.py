@@ -16,8 +16,8 @@ amenities_api = Blueprint("amenities_api", __name__)
 @jwt_required()
 def add_amenity():
     """
-    Function used to create a new amenity, send it to the database datamanager
-    and read a list of existing amenities.
+    Function used to create a new amenity, send it to the database datamanager.
+    :Returns: jsonify + message + error/success code.
     """
     current_user = get_jwt_identity()
     amenity_data = request.get_json()
@@ -45,14 +45,23 @@ def add_amenity():
 
 @amenities_api.route("/amenities", methods=["GET"])
 def read_all_amenities():
+    """
+    Function used to retrieve and read all amenities from the database.
+    :Returns: jsonify + message + error/success code.
+    """
     all_amenities = Amenity.query.all()
     if not all_amenities:
         return jsonify({"Error": "Amenity not found."}), 404
-    return jsonify([DataManager.read(amenity) for amenity in all_amenities])
+    return jsonify([DataManager.read(amenity) for amenity in all_amenities]), 201
 
 
 @amenities_api.route("/amenities/<string:id>", methods=['GET'])
 def read_one_amenity(id):
+    """
+    function used to retrieve and read a specific amenity from the database.
+    :param id: UUID - Unique ID of the amenity.
+    :Returns: jsonify + message + error/status code.
+    """
     one_amenity = Amenity.query.filter_by(id=id)
     if not one_amenity:
         return jsonify({"Error": "Amenity not found."}), 404
@@ -62,10 +71,17 @@ def read_one_amenity(id):
 @amenities_api.route("/amenities/<string:id>", methods=['PUT'])
 @jwt_required()
 def update_amenity(id):
+    """
+    Function used to update a specific amenity from the database.
+    Admin only
+    :param id: UUID - Unique ID of the amenity.
+    :Returns: jsonify + message + error/status code.
+    """
     current_user = get_jwt_identity()
     is_admin = admin_only()
     if not is_admin:
         return jsonify({"Error": "Admin only !"}), 401
+
     amenity = Amenity.query.get(id)
     if not amenity:
         return jsonify({'Error': 'Amenity not found'}), 404
@@ -83,10 +99,17 @@ def update_amenity(id):
 @amenities_api.route("/amenities/<string:id>", methods=['DELETE'])
 @jwt_required()
 def delete_amenity(id):
+    """
+    Function used to delete a specific amenity from the database.
+    Admin only
+    :param id: UUID - ID of the amenity.
+    :Returns: jsonify + message + error/success code.
+    """
     current_user = get_jwt_identity()
     is_admin = admin_only()
     if not is_admin:
         return jsonify({"Error": "Admin only !"}), 401
+
     amenity = Amenity.query.get(id)
     if not amenity:
         return jsonify({'Error': 'Amenity not found'}), 404
