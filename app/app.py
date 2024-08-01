@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -56,6 +56,22 @@ def create_app():
     app.register_blueprint(user_api)
     from api.login_api import login_api
     app.register_blueprint(login_api)
+
+    @app.route('/')
+    def home():
+        return render_template('index.html')
+
+    @app.route('/login')
+    def login():
+        return render_template('login.html')
+
+    @app.route('/place')
+    def place():
+        return render_template('place.html')
+
+    @app.route('/add_review')
+    def add_review():
+        return render_template('add_review.html')
 
     return app
 
